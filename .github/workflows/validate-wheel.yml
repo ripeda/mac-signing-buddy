@@ -1,0 +1,68 @@
+name: CI - Validate Wheel
+
+on:
+  push:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Validate Wheel
+    runs-on: macos-latest
+    env:
+      branch: ${{ github.ref }}
+
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Set up build tools
+        run: pip3 install setuptools wheel twine build
+
+      - name: Validate setup.py
+        run: python3 setup.py check --metadata --strict
+
+      - name: Test setup.py
+        run: python3 setup.py test
+
+      - name: Build portable executable
+        run: python3 -m build --wheel
+
+      - name: Validate wheel
+        run: twine check dist/mac_signing_buddy-*.whl
+
+      - name: Install wheel
+        run: pip3 install dist/mac_signing_buddy-*.whl
+
+      - name: Test wheel
+        run: cd /; python3 -c "import mac_signing_buddy; print(mac_signing_buddy.__version__)"
+
+      - name: Upload wheel (artifact)
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac_signing_buddy.whl
+          path: dist/mac_signing_buddy-*.whl
+
+      - name: Upload executable (release)
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/mac_signing_buddy-*.whl
+          asset_name: mac_signing_buddy.whl (wheel)
+          tag: ${{ github.ref }}
+          file_glob: true
+
+      - name: Publish PyPI Package
+        if: github.event_name == 'release'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: twine upload dist/*
