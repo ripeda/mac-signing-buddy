@@ -1,10 +1,9 @@
 """
-mac-signing-buddy is a Python package that provides a simple interface to
-Apple's codesign and notarization tools. It is designed to be used in a
-CI/CD environment to sign and notarize macOS applications.
+mac_signing_buddy is a Python package that provides a simple interface to
+Apple's codesign and notarization tools.
 """
 
-__title__:        str = "mac-signing-buddy"
+__title__:        str = "mac_signing_buddy"
 __version__:      str = "1.0.0"
 __description__:  str = "A Python package to sign and notarize macOS applications."
 __url__:          str = "https://github.com/ripeda/mac-signing-buddy"

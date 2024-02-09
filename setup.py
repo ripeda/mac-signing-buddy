@@ -1,5 +1,5 @@
 """
-setup.py: Setup script for mac-signing-buddy application.
+setup.py: Setup script for mac_signing_buddy application.
 
 Usage:
     python3 -m build --wheel
@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 def fetch_property(property: str) -> str:
     """
-    Fetch a property from the main mac-signing-buddy class.
+    Fetch a property from the main mac_signing_buddy class.
 
     Parameters:
         property (str): The name of the property to fetch.
@@ -52,7 +52,7 @@ def status_to_classifier(status: str) -> str:
 
 
 setup(
-    name="mac-signing-buddy",
+    name="mac_signing_buddy",
     version=fetch_property("__version__:"),
     description=fetch_property("__description__:"),
     long_description_content_type="text/markdown",
@@ -64,14 +64,14 @@ setup(
     python_requires=">=3.6",
     packages=find_packages(include=["mac_signing_buddy"]),
     package_data={
-        "mac-signing-buddy": ["*"],
+        "mac_signing_buddy": ["*"],
     },
     entry_points={
         "console_scripts": [
-            "mac-signing-buddy = mac_signing_buddy.cli:main",
+            "mac_signing_buddy = mac_signing_buddy.cli:main",
         ],
     },
-    py_modules=["mac-signing-buddy"],
+    py_modules=["mac_signing_buddy"],
     include_package_data=True,
     # install_requires=open("requirements.txt", "r").readlines(),
     classifiers=[
