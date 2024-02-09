@@ -6,6 +6,19 @@ import logging
 import subprocess
 
 
+class NotarizationFailed(Exception):
+    """
+    Exception raised when the notarization process fails
+    """
+    pass
+
+class NotarizationFilePreparationFailed(Exception):
+    """
+    Exception raised when the file preparation for notarization fails
+    """
+    pass
+
+
 class Notarize:
     """
     Parameters:
@@ -33,7 +46,7 @@ class Notarize:
         result = subprocess.run(["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", self._file, self._output], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
             logging.error(f"Error preparing file: {result.stderr.decode('utf-8')}")
-            raise Exception("File preparation failed")
+            raise NotarizationFilePreparationFailed(f"File preparation failed: {result.stderr.decode('utf-8')}")
 
 
     def _decode_id_from_stdout(self, stdout: str) -> str:
@@ -61,10 +74,6 @@ class Notarize:
         Sign the file
         """
 
-        if any([self._apple_id is None, self._password is None, self._team_id is None]):
-            logging.warning("Error: Notarization credentials not provided, skipping")
-            return
-
         self._prepare_file()
         logging.info(f"Uploading {self._output} for notarization")
 
@@ -74,7 +83,8 @@ class Notarize:
         result = subprocess.run(arguments, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
             logging.error(f"Error notarizing: {result.stderr.decode('utf-8')}")
-            raise Exception("Notarization failed")
+            raise NotarizationFailed(f"Notarization failed: {result.stderr.decode('utf-8')}")
         if "status: Accepted" not in result.stdout.decode("utf-8"):
-            logging.error(f"Error notarizing: {self._fetch_error(self._decode_id_from_stdout(result.stdout.decode('utf-8')))}")
-            raise Exception("Notarization failed")
+            error = self._fetch_error(self._decode_id_from_stdout(result.stdout.decode("utf-8")))
+            logging.error(error)
+            raise NotarizationFailed(f"Notarization failed: {error}")
