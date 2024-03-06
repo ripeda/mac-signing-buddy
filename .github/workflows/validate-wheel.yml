@@ -64,5 +64,5 @@ jobs:
         if: github.event_name == 'release'
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_PASSWORD: ${{ secrets.ORG_PYPI_PASSWORD }}
         run: twine upload dist/*
