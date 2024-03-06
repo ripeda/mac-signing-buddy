@@ -25,14 +25,16 @@ class SigningFailed(Exception):
 class Sign:
     """
     Parameters:
-        file:         str - The file or directory to sign
-        identity:     str - The identity to use for signing
-        entitlements: str - The entitlements file to use for signing
+        file:         str  - The file or directory to sign
+        identity:     str  - The identity to use for signing
+        entitlements: str  - The entitlements file to use for signing
+        options:      list - The options to use for signing
     """
-    def __init__(self, file: str, identity: str, entitlements: str = None) -> None:
+    def __init__(self, file: str, identity: str, entitlements: str = None, options: list = ["runtime"]) -> None:
         self._file     = file
         self._identity = identity
         self._entitlements = entitlements
+        self._options = options
 
 
     def is_signing_identity_valid(self) -> bool:
@@ -66,8 +68,12 @@ class Sign:
 
         # Insert the entitlements flag if provided
         if self._entitlements is not None:
+            self._entitlements = Path(self._entitlements).resolve()
             arguments.insert(1, "--entitlements")
             arguments.insert(2, self._entitlements)
+
+        if self._options is not None:
+            arguments.insert(1, f"--options={','.join(self._options)}")
 
         result = subprocess.run(arguments, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:

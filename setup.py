@@ -73,7 +73,6 @@ setup(
     },
     py_modules=["mac_signing_buddy"],
     include_package_data=True,
-    # install_requires=open("requirements.txt", "r").readlines(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
