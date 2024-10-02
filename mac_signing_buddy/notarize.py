@@ -33,7 +33,7 @@ class Notarize:
         self._apple_id = apple_id
         self._password = password
         self._team_id  = team_id
-        self._output   = f"{self._file}.zip"
+        self._output   = f"{self._file}.zip" if not self._file.endswith(".zip") else self._file
         if output is not None:
             self._output = output
 
@@ -42,8 +42,11 @@ class Notarize:
         """
         Prepare the file for notarization
         """
+        if self._file.endswith(".zip"):
+            return
+
         logging.info(f"Preparing {self._file} for notarization")
-        result = subprocess.run(["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", self._file, self._output], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(["/usr/bin/ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", self._file, self._output], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
             logging.error(f"Error preparing file: {result.stderr.decode('utf-8')}")
             raise NotarizationFilePreparationFailed(f"File preparation failed: {result.stderr.decode('utf-8')}")
@@ -63,7 +66,7 @@ class Notarize:
         """
         Retrieve the error message
         """
-        result = subprocess.run(["xcrun", "notarytool", "log", id, "--apple-id", self._apple_id, "--password", self._password, "--team-id", self._team_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(["/usr/bin/xcrun", "notarytool", "log", id, "--apple-id", self._apple_id, "--password", self._password, "--team-id", self._team_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
             return result.stderr.decode("utf-8")
         return result.stdout.decode("utf-8")
@@ -73,12 +76,11 @@ class Notarize:
         """
         Sign the file
         """
-
         self._prepare_file()
         logging.info(f"Uploading {self._output} for notarization")
 
         arguments = [
-            "xcrun", "notarytool", "submit", self._output, "--apple-id", self._apple_id, "--password", self._password, "--team-id", self._team_id, "--wait"
+            "/usr/bin/xcrun", "notarytool", "submit", self._output, "--apple-id", self._apple_id, "--password", self._password, "--team-id", self._team_id, "--wait"
         ]
         result = subprocess.run(arguments, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
@@ -88,3 +90,10 @@ class Notarize:
             error = self._fetch_error(self._decode_id_from_stdout(result.stdout.decode("utf-8")))
             logging.error(error)
             raise NotarizationFailed(f"Notarization failed: {error}")
+
+
+    def notarize(self) -> None:
+        """
+        Alias for sign
+        """
+        self.sign()

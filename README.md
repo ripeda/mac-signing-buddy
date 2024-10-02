@@ -2,6 +2,8 @@
 
 Python module to easily sign Mac applications.
 
+Note: Notarization requires Xcode Command Line Tools to be installed. This is due to the `notarytool` requirement.
+
 
 ## Usage - CLI
 
@@ -32,5 +34,5 @@ sign_obj = Sign(file, identity, entitlements)
 sign_obj.sign()
 
 notarize_obj = Notarize(file, apple_id, password, team_id, output)
-notarize_obj.sign()
+notarize_obj.notarize()
 ```

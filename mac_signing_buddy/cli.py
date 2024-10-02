@@ -40,4 +40,4 @@ def main():
 
     if all([args.apple_id, args.password, args.team_id, args.file]):
         notarize_obj = Notarize(args.file, args.apple_id, args.password, args.team_id, args.output)
-        notarize_obj.sign()
+        notarize_obj.notarize()
